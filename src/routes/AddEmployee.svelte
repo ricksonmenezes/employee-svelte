@@ -1,11 +1,11 @@
 <script>
     import { Input, Label,Dropdown,DropdownItem, Helper, Button, Checkbox, A } from 'flowbite-svelte';
     import { ChevronDownOutline } from 'flowbite-svelte-icons';
+    import apiService from '../lib/api';
+    import {createEmployeeMutation} from "../lib/graphqlqueries.js";
 
 
-    let selectedMaritalStatus = '';
     let maritalStatusError = '';
-    let selectedGender = '';
     let genderError = '';
     let contactPrimaryError = '';
     let addressPrimaryError = '';
@@ -16,77 +16,121 @@
          contactPrimary3 : false,
          addressPrimary1 : false,
          addressPrimary2 : false,
-         contact1: null,
-         contact2: null,
-         contact3: null,
+         contact1: '',
+         contact2: '',
+         contact3: '',
          selectedMaritalStatus : '',
          selectedGender : '',
          hireddate: null,
          birthdate: null,
-         position: null,
+         position: '',
          address1:'',
          address2:'',
          address3:'',
-         address4:''
+         address4:'',
+         firstName: '',
+         lastName: '',
+         middleName:''
+
 
     };
-    /*let contactPrimary1 = false;
-    let contactPrimary2 = false;
-    let contactPrimary3 = false;
-    let addressPrimary1 = false;
-    let addressPrimary2 = false;
-    let addressPrimary3 = false;*/
-
-
-
 
     function handleSubmit() {
-        if (!selectedMaritalStatus) {
+
+        if (!formData.selectedMaritalStatus) {
             maritalStatusError = 'This field is required.';
         } else {
             maritalStatusError = '';
             // Proceed with form submission
-            console.log('Form submitted with value:', selectedMaritalStatus);
+            console.log('Form submitted with value:', formData.selectedMaritalStatus);
         }
 
-        if (!selectedGender) {
+        if (!formData.selectedGender) {
             genderError = 'This field is required.';
-        } else {
-            genderError = '';
-            // Proceed with form submission
-            console.log('Form submitted with value:', genderError);
-        }
+        } else genderError = '';
 
         const moreThanOneContactPrimary = (formData.contactPrimary1 && (formData.contactPrimary2 || formData.contactPrimary3)) || (formData.contactPrimary2 && formData.contactPrimary3);
         if (!formData.contactPrimary1 && !formData.contactPrimary2 && !formData.contactPrimary3) {
             contactPrimaryError = 'At least one contact must be selected as primary';
         } else if (moreThanOneContactPrimary) {
             contactPrimaryError = 'Only one contact must be selected as primary';
-        }
-        else {
-            contactPrimaryError = '';
-        }
+        } else contactPrimaryError = '';
+
 
 
         if (!formData.addressPrimary1 && !formData.addressPrimary2) {
-            contactPrimaryError = 'At least one address must be selected as primary';
+            addressPrimaryError = 'At least one address must be selected as primary';
         } else if (formData.addressPrimary1 && formData.addressPrimary2) {
-            contactPrimaryError = 'Only one address must be selected as primary';
-        }
-        else {
-            addressPrimaryError = '';
-        }
+            addressPrimaryError = 'Only one address must be selected as primary';
+        } else if(formData.addressPrimary2 && (!formData.address3 || !formData.address4)) {
+            addressPrimaryError = 'address selected as primary is not filled';
+        } else addressPrimaryError = '';
+
 
         let noError =  !(addressPrimaryError || moreThanOneContactPrimary || genderError || contactPrimaryError || maritalStatusError);
         if(noError) {
+            console.log(formData.birthdate);
+
+
+            let contacts = [];
+
+
+            contacts.push({contact:formData.contact1, isPrimary: formData.contactPrimary1})
+
+            if(formData.contact2) {
+                contacts.push({contact:formData.contact2, isPrimary: formData.contactPrimary2})
+            }
+            if(formData.contact3) {
+                contacts.push({contact:formData.contact3, isPrimary: formData.contactPrimary3})
+            }
+
+            let addresses = [];
+            addresses.push({address1: formData.address1, address2: formData.address2, isPrimary: formData.addressPrimary1})
+
+            if(formData.addressPrimary2) {
+                addresses.push({address1: formData.address3, address2: formData.address4, isPrimary: formData.addressPrimary2})
+            }
+
+
+
+            let employeeData = {
+                firstName: formData.firstName,
+                middleName: formData.middleName,
+                lastName: formData.lastName,
+                maritalStatus : formData.selectedMaritalStatus,
+                gender : formData.selectedGender,
+                hiredDate: Date.parse(formData.hireddate),
+                birthDate: Date.parse(formData.birthdate),
+                position: formData.position,
+                contacts: contacts,
+                addresses: addresses
+            };
+
 
             debugger
+            const mutation = createEmployeeMutation(employeeData)
+            createEmployee(mutation);
+        }
 
+
+
+
+    }
+
+    async function createEmployee(mutation) {
+
+        try {
+            const response = await apiService.createEmployee(mutation);
+            console.log('Response:', response.data);
+        } catch (error) {
+           console.log(error);
         }
 
     }
 </script>
 
+<h1>Add an Employee</h1>
+<p></p>
 <form on:submit|preventDefault={handleSubmit}>
     <div class="grid gap-x-8 gap-y-4 grid-cols-4">
         <div>
@@ -142,13 +186,13 @@
         <div>
             <div>
                 <Label for="address1" class="mb-2">Address 1</Label>
-                <Input type="text" id="address1" bind:value={formData.address1} placeholder="Apartment 23A, Rupert Street" />
+                <Input type="text" id="address1" bind:value={formData.address1} placeholder="Apartment 23A, Rupert Street" required />
             </div>
         </div>
         <div>
             <div>
                 <Label for="address2" class="mb-2">Address 2</Label>
-                <Input type="text" id="address2" bind:value={formData.address2} placeholder="Lexington Avenue, London" />
+                <Input type="text" id="address2" bind:value={formData.address2} placeholder="Lexington Avenue, London" required />
             </div>
         </div>
         <div>
@@ -160,13 +204,13 @@
         <div>
             <Label for="gender" class="mb-2">Gender</Label>
             <Button><ChevronDownOutline class="w-6 h-6 ms-2 text-white dark:text-white" />
-                {selectedGender || 'Select an option'}</Button>
+                {formData.selectedGender || 'Select an option'}</Button>
             <Dropdown>
-                <DropdownItem on:click={() => { formData.selectedGender = 'Male'; genderError='' }}>Male</DropdownItem>
-                <DropdownItem on:click={() => { formData.selectedGender = 'Female';genderError='' }}>Female</DropdownItem>
-                <DropdownItem on:click={() => { formData.selectedGender = 'Other';genderError='' }}>Other</DropdownItem>
+                <DropdownItem on:click={() => { formData.selectedGender = 'MALE'; genderError='' }}>Male</DropdownItem>
+                <DropdownItem on:click={() => { formData.selectedGender = 'FEMALE';genderError='' }}>Female</DropdownItem>
+                <DropdownItem on:click={() => { formData.selectedGender = 'OTHER';genderError='' }}>Other</DropdownItem>
             </Dropdown>
-            {#if genderError}
+            {#if formData.genderError}
                 <p class="text-red-500">{genderError}</p>
             {/if}
         </div>
@@ -191,11 +235,11 @@
         <div>
             <Label for="maritalstatus" class="mb-2">Marital Status</Label>
             <Button><ChevronDownOutline class="w-6 h-6 ms-2 text-white dark:text-white" />
-                {selectedMaritalStatus || 'Select an option'}</Button>
+                {formData.selectedMaritalStatus || 'Select an option'}</Button>
             <Dropdown>
-                <DropdownItem on:click={() => { formData.selectedMaritalStatus = 'Married'; maritalStatusError='' }}>Married</DropdownItem>
-                <DropdownItem on:click={() => { formData.selectedMaritalStatus = 'Single'; maritalStatusError='' }}>Single</DropdownItem>
-                <DropdownItem on:click={() => { formData.selectedMaritalStatus = 'Widowed'; maritalStatusError='' }}>Widowed</DropdownItem>
+                <DropdownItem on:click={() => { formData.selectedMaritalStatus = 'MARRIED'; maritalStatusError='' }}>Married</DropdownItem>
+                <DropdownItem on:click={() => { formData.selectedMaritalStatus = 'SINGLE'; maritalStatusError='' }}>Single</DropdownItem>
+                <DropdownItem on:click={() => { formData.selectedMaritalStatus = 'WIDOWED'; maritalStatusError='' }}>Widowed</DropdownItem>
             </Dropdown>
             {#if maritalStatusError}
                 <p class="text-red-500">{maritalStatusError}</p>
@@ -213,7 +257,7 @@
         <div></div>
         <div>
             <Label for="hireddate" class="mb-2">Date Hired</Label>
-            <Input type="date" id="hireddate"  bind:value={formData.hiredate} required />
+            <Input type="date" id="hireddate"  bind:value={formData.hireddate} required />
         </div>
         <div></div>
     </div>

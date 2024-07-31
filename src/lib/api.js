@@ -1,11 +1,17 @@
-// src/api.js
 import axios from 'axios';
 
 const api = axios.create({
-    baseURL: 'http://localhost:9898', // Adjust to your Spring Boot server URL
+    baseURL: 'http://localhost:8081', // Your Spring Boot server URL
     headers: {
         'Content-Type': 'application/json',
     },
 });
 
-export default api;
+const apiService = {
+    createEmployee(payload) {
+        return api.post('/graphql', { query: payload });
+    },
+    // Add other API methods here
+};
+
+export default apiService;

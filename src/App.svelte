@@ -10,7 +10,7 @@ import AddEmployee from "./routes/AddEmployee.svelte";
 <main>
 
   <div>
-    <h4>Add an Employee</h4>
+
     <Router routes={{
                 '/': EmployeeList,
                 '/add2': AddEmployee
