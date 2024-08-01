@@ -8,7 +8,7 @@ const api = axios.create({
 });
 
 const apiService = {
-    createEmployee(payload) {
+    getGraphQLData(payload) {
         return api.post('/graphql', { query: payload });
     },
     // Add other API methods here

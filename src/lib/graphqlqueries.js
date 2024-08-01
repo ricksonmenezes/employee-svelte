@@ -34,3 +34,30 @@ export function createEmployeeMutation(employeeData) {
         }
     `;
 }
+
+export function getEmployeeListGql() {
+
+    return `
+        query {
+  employees {
+    code
+    firstName
+    middleName
+    lastName
+    birthDate
+    hiredDate
+    
+    contacts {
+      contactNo
+      primary
+    }
+    addresses{
+      address1
+      address2
+      primary
+    }
+    
+  }
+}
+    `;
+}

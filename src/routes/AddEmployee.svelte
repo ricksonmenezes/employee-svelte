@@ -111,10 +111,7 @@
             addresses: addresses
         };
 
-
-
-        const mutation = createEmployeeMutation(employeeData)
-        createEmployee(mutation);
+        createEmployee(employeeData);
 
 
 
@@ -122,10 +119,11 @@
 
     }
 
-    async function createEmployee(mutation) {
+    async function createEmployee(employeeData) {
 
+        const mutation = createEmployeeMutation(employeeData)
         try {
-            const response = await apiService.createEmployee(mutation);
+            const response = await apiService.getGraphQLData(mutation);
             if(response.status === 200) {
                 console.log('Response:', response.data);
                 navigate('/');
