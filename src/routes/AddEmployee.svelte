@@ -1,5 +1,7 @@
 <script>
     import { Input, Label,Dropdown,DropdownItem, Helper, Button, Checkbox, A } from 'flowbite-svelte';
+    import { navigate } from 'svelte-routing'
+
     import { ChevronDownOutline } from 'flowbite-svelte-icons';
     import apiService from '../lib/api';
     import {createEmployeeMutation} from "../lib/graphqlqueries.js";
@@ -9,6 +11,7 @@
     let genderError = '';
     let contactPrimaryError = '';
     let addressPrimaryError = '';
+    let addEmployeeError = '';
 
     let formData = {
          contactPrimary1 : false,
@@ -67,50 +70,52 @@
         } else addressPrimaryError = '';
 
 
-        let noError =  !(addressPrimaryError || moreThanOneContactPrimary || genderError || contactPrimaryError || maritalStatusError);
-        if(noError) {
-            console.log(formData.birthdate);
-
-
-            let contacts = [];
-
-
-            contacts.push({contact:formData.contact1, isPrimary: formData.contactPrimary1})
-
-            if(formData.contact2) {
-                contacts.push({contact:formData.contact2, isPrimary: formData.contactPrimary2})
-            }
-            if(formData.contact3) {
-                contacts.push({contact:formData.contact3, isPrimary: formData.contactPrimary3})
-            }
-
-            let addresses = [];
-            addresses.push({address1: formData.address1, address2: formData.address2, isPrimary: formData.addressPrimary1})
-
-            if(formData.addressPrimary2) {
-                addresses.push({address1: formData.address3, address2: formData.address4, isPrimary: formData.addressPrimary2})
-            }
-
-
-
-            let employeeData = {
-                firstName: formData.firstName,
-                middleName: formData.middleName,
-                lastName: formData.lastName,
-                maritalStatus : formData.selectedMaritalStatus,
-                gender : formData.selectedGender,
-                hiredDate: Date.parse(formData.hireddate),
-                birthDate: Date.parse(formData.birthdate),
-                position: formData.position,
-                contacts: contacts,
-                addresses: addresses
-            };
-
-
-            debugger
-            const mutation = createEmployeeMutation(employeeData)
-            createEmployee(mutation);
+        let error =  (addressPrimaryError || moreThanOneContactPrimary || genderError || contactPrimaryError || maritalStatusError);
+        if(error) {
+            return;
         }
+        console.log(formData.birthdate);
+
+
+        let contacts = [];
+
+
+        contacts.push({contact:formData.contact1, isPrimary: formData.contactPrimary1})
+
+        if(formData.contact2) {
+            contacts.push({contact:formData.contact2, isPrimary: formData.contactPrimary2})
+        }
+        if(formData.contact3) {
+            contacts.push({contact:formData.contact3, isPrimary: formData.contactPrimary3})
+        }
+
+        let addresses = [];
+        addresses.push({address1: formData.address1, address2: formData.address2, isPrimary: formData.addressPrimary1})
+
+        if(formData.addressPrimary2) {
+            addresses.push({address1: formData.address3, address2: formData.address4, isPrimary: formData.addressPrimary2})
+        }
+
+
+
+        let employeeData = {
+            firstName: formData.firstName,
+            middleName: formData.middleName,
+            lastName: formData.lastName,
+            maritalStatus : formData.selectedMaritalStatus,
+            gender : formData.selectedGender,
+            hiredDate: Date.parse(formData.hireddate),
+            birthDate: Date.parse(formData.birthdate),
+            position: formData.position,
+            contacts: contacts,
+            addresses: addresses
+        };
+
+
+
+        const mutation = createEmployeeMutation(employeeData)
+        createEmployee(mutation);
+
 
 
 
@@ -121,7 +126,13 @@
 
         try {
             const response = await apiService.createEmployee(mutation);
-            console.log('Response:', response.data);
+            if(response.status === 200) {
+                console.log('Response:', response.data);
+                navigate('/');
+            } else {
+                addEmployeeError = 'Something went wrong when creating an employee record. Please try again later.'
+            }
+
         } catch (error) {
            console.log(error);
         }
@@ -270,6 +281,11 @@
     <div>
         {#if addressPrimaryError}
             <p class="text-red-500">{addressPrimaryError}</p>
+        {/if}
+    </div>
+    <div>
+        {#if addEmployeeError}
+            <p class="text-red-500">{addEmployeeError}</p>
         {/if}
     </div>
     <Button type="submit">Submit</Button>

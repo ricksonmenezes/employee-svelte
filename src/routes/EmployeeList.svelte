@@ -1,5 +1,6 @@
 <script>
-    import Router from 'svelte-spa-router';
+    /*import Router from 'svelte-spa-router';*/
+    import { Link } from 'svelte-routing';
     import axios from 'axios';
     import { fly } from 'svelte/transition';
 
@@ -125,6 +126,6 @@
 
 <div>
 
-            <a href="/#/add2" >Add Employee</a>
+    <Link to="/add2">Add Employee</Link>
 
 </div>

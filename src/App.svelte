@@ -2,7 +2,8 @@
 import svelteLogo from './assets/svelte.svg'
 import viteLogo from '/vite.svg'
 import Counter from './lib/Counter.svelte'
-import Router from 'svelte-spa-router';
+import { Router, Route, Link, navigate } from 'svelte-routing';
+/*import Router from 'svelte-spa-router';*/
 import EmployeeList from "./routes/EmployeeList.svelte";
 import AddEmployee from "./routes/AddEmployee.svelte";
 </script>
@@ -11,10 +12,14 @@ import AddEmployee from "./routes/AddEmployee.svelte";
 
   <div>
 
-    <Router routes={{
+    <!--<Router routes={{
                 '/': EmployeeList,
                 '/add2': AddEmployee
-            }} />
+            }} />-->
+    <Router>
+      <Route path="/" component={EmployeeList} />
+      <Route path="/add2" component={AddEmployee} />
+    </Router>
   </div>
 </main>
 
