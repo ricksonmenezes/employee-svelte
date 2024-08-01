@@ -1,10 +1,66 @@
+
+
 <script>
     import { Input, Label,Dropdown,DropdownItem, Helper, Button, Checkbox, A } from 'flowbite-svelte';
     import { navigate } from 'svelte-routing'
+    import { onMount } from 'svelte';
+    import { DatePicker } from "@svelte-plugins/datepicker";
+    import { format } from 'date-fns';
 
     import { ChevronDownOutline } from 'flowbite-svelte-icons';
     import apiService from '../lib/api';
     import {createEmployeeMutation} from "../lib/graphqlqueries.js";
+
+    let formData = {
+        contactPrimary1 : false,
+        contactPrimary2 : false,
+        contactPrimary3 : false,
+        addressPrimary1 : false,
+        addressPrimary2 : false,
+        contact1: '',
+        contact2: '',
+        contact3: '',
+        selectedMaritalStatus : '',
+        selectedGender : '',
+        hireddate: null,
+        birthdate: null,
+        position: '',
+        address1:'',
+        address2:'',
+        address3:'',
+        address4:'',
+        firstName: '',
+        lastName: '',
+        middleName:''
+
+    };
+
+    let startDate1 = new Date();
+    let startDate2 = new Date();
+    let dateFormat = 'MM/dd/yy';
+    let isOpen1 = false;
+    let isOpen2 = false;
+
+    const toggleDatePicker1 = () => (isOpen1 = !isOpen1);
+    const toggleDatePicker2 = () => (isOpen2 = !isOpen2);
+
+    const formatDate = (dateString) => {
+        return dateString && format(new Date(dateString), dateFormat) || '';
+    };
+
+    let formattedStartDate1 = formatDate(startDate1);
+    let formattedStartDate2 = formatDate(startDate2);
+
+    const onChange1 = () => {
+        startDate1 = new Date(formattedStartDate1);
+    };
+
+    const onChange2 = () => {
+        startDate2 = new Date(formattedStartDate2);
+    };
+
+    $: formattedStartDate1 = formatDate(startDate1);
+    $: formattedStartDate2 = formatDate(startDate2);
 
 
     let maritalStatusError = '';
@@ -13,30 +69,7 @@
     let addressPrimaryError = '';
     let addEmployeeError = '';
 
-    let formData = {
-         contactPrimary1 : false,
-         contactPrimary2 : false,
-         contactPrimary3 : false,
-         addressPrimary1 : false,
-         addressPrimary2 : false,
-         contact1: '',
-         contact2: '',
-         contact3: '',
-         selectedMaritalStatus : '',
-         selectedGender : '',
-         hireddate: null,
-         birthdate: null,
-         position: '',
-         address1:'',
-         address2:'',
-         address3:'',
-         address4:'',
-         firstName: '',
-         lastName: '',
-         middleName:''
 
-
-    };
 
     function handleSubmit() {
 
@@ -70,11 +103,14 @@
         } else addressPrimaryError = '';
 
 
+
         let error =  (addressPrimaryError || moreThanOneContactPrimary || genderError || contactPrimaryError || maritalStatusError);
         if(error) {
             return;
         }
-        console.log(formData.birthdate);
+        console.log("startdate1 " + startDate1);
+        console.log("formattedStartDate1 "  + formattedStartDate1)
+        debugger
 
 
         let contacts = [];
@@ -95,7 +131,7 @@
         if(formData.addressPrimary2) {
             addresses.push({address1: formData.address3, address2: formData.address4, isPrimary: formData.addressPrimary2})
         }
-
+  console.log('reach')
 
 
         let employeeData = {
@@ -104,8 +140,8 @@
             lastName: formData.lastName,
             maritalStatus : formData.selectedMaritalStatus,
             gender : formData.selectedGender,
-            hiredDate: Date.parse(formData.hireddate),
-            birthDate: Date.parse(formData.birthdate),
+            hiredDate: Date.parse(formattedStartDate2),
+            birthDate: Date.parse(formattedStartDate1),
             position: formData.position,
             contacts: contacts,
             addresses: addresses
@@ -190,7 +226,18 @@
         <div></div>
         <div>
             <Label for="birthdate" class="mb-2">Birth Date</Label>
-            <Input type="date" id="birthdate" bind:value={formData.birthdate}  required />
+           <!-- <Input type="date" id="birthdate" bind:value={formData.birthdate}  required />-->
+            <!--<div class="relative max-w-sm">
+                <div class="absolute inset-y-0 start-0 flex items-center ps-3.5 pointer-events-none">
+                    <svg class="w-4 h-4 text-gray-500 dark:text-gray-400" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20">
+                        <path d="M20 4a2 2 0 0 0-2-2h-2V1a1 1 0 0 0-2 0v1h-3V1a1 1 0 0 0-2 0v1H6V1a1 1 0 0 0-2 0v1H2a2 2 0 0 0-2 2v2h20V4ZM0 18a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V8H0v10Zm5-8h10a1 1 0 0 1 0 2H5a1 1 0 0 1 0-2Z"/>
+                    </svg>
+                </div>
+                <input required  id="birthdate" bind:value={formData.birthdate} type="text" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full ps-10 p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="Select date">
+            </div>-->
+            <DatePicker   bind:isOpen={isOpen1} bind:startDate={startDate1}>
+                <input type="text" bind:value={formattedStartDate1} required placeholder="Select date" on:change={onChange1}  on:click={toggleDatePicker1} />
+            </DatePicker>
         </div>
         <div>
             <div>
@@ -266,7 +313,10 @@
         <div></div>
         <div>
             <Label for="hireddate" class="mb-2">Date Hired</Label>
-            <Input type="date" id="hireddate"  bind:value={formData.hireddate} required />
+            <!--<Input type="date" id="hireddate"  bind:value={formData.hireddate} required />-->
+            <DatePicker   bind:isOpen={isOpen2} bind:startDate={startDate2}>
+                <input  type="text" bind:value={formattedStartDate2} required placeholder="Select date" on:change={onChange2} on:click={toggleDatePicker2} />
+            </DatePicker>
         </div>
         <div></div>
     </div>

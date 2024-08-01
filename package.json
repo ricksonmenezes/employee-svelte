@@ -20,8 +20,9 @@
     "vite": "^5.3.4"
   },
   "dependencies": {
+    "@svelte-plugins/datepicker": "^1.0.9",
     "axios": "^1.7.2",
-    "svelte-routing": "^2.13.0",
-    "svelte-spa-router": "^4.0.1"
+    "date-fns": "^3.6.0",
+    "svelte-routing": "^2.13.0"
   }
 }
