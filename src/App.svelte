@@ -6,6 +6,7 @@ import { Router, Route, Link, navigate } from 'svelte-routing';
 /*import Router from 'svelte-spa-router';*/
 import EmployeeList from "./routes/EmployeeList.svelte";
 import AddEmployee from "./routes/AddEmployee.svelte";
+import ViewEmployee from "./routes/ViewEmployee.svelte";
 </script>
 
 <main>
@@ -19,6 +20,7 @@ import AddEmployee from "./routes/AddEmployee.svelte";
     <Router>
       <Route path="/" component={EmployeeList} />
       <Route path="/add2" component={AddEmployee} />
+      <Route path="/view" component={ViewEmployee} />
     </Router>
   </div>
 </main>

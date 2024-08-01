@@ -8,50 +8,26 @@
 
 
     var employeesTable = [];
-    var addEmployeeForm = {
-        title: '',
-        author: '',
-        description: '',
-    };
-    var editForm = {
-        _id: '',
-        title: '',
-        author: '',
-        description: '',
-    };
 
-
-
-
-
-    function getEmployeesForTable(employees) {
-
-
-        debugger
-        const currentDate = new Date();
+    function prepareEmploteeDataForTable(employees) {
 
          employeesTable = employees.data.employees.map(employee => {
-            // Concatenate names
+
+             const code = employee.code;
             const name = `${employee.firstName} ${employee.middleName} ${employee.lastName}`;
 
-            // Get primary address
             const primaryAddressObj = employee.addresses.find(address => address.primary);
             const primaryAddress = primaryAddressObj ? `${primaryAddressObj.address1} ${primaryAddressObj.address2}` : '';
 
-            // Get primary contact
             const primaryContactObj = employee.contacts.find(contact => contact.primary);
             const primaryContact = primaryContactObj ? primaryContactObj.contactNo : '';
-
-            // Calculate age
 
             const age = calculateAge(employee.birthDate)
 
             const yearsInCompany  = calculateAge(employee.hiredDate)
-            // Calculate years in company
-            const hiredDate = new Date(employee.hiredDate);
-           // const yearsInCompany = currentDate.getUTCFullYear() - hiredDate.getUTCFullYear() - (currentDate.getUTCMonth() < hiredDate.getUTCMonth() || (currentDate.getUTCMonth() === hiredDate.getUTCMonth() && currentDate.getUTCDate() < hiredDate.getUTCDate()) ? 1 : 0);
 
             return {
+                code,
                 name,
                 primaryAddress,
                 primaryContact,
@@ -60,22 +36,18 @@
             };
         });
 
-        debugger
         console.log(employeesTable);
-
 
     }
 
     function calculateAge(dateString) {
-        // Parse the date string into a Date object
+
         const birthDate = new Date(dateString);
         const today = new Date();
 
-        // Calculate the age
         let age = today.getFullYear() - birthDate.getFullYear();
         const monthDiff = today.getMonth() - birthDate.getMonth();
 
-        // Adjust age if the birthday hasn't occurred yet this year
         if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
             age--;
         }
@@ -90,10 +62,9 @@
             const response = await apiService.getGraphQLData(graphQuery);
             if(response.status === 200) {
 
-
                 console.log('Response:', response.data);
-                debugger
-                getEmployeesForTable(response.data);
+
+                prepareEmploteeDataForTable(response.data);
 
             } else {
              //   addEmployeeError = 'Something went wrong when creating an employee record. Please try again later.'
@@ -106,82 +77,9 @@
 
     }
 
-    function removeEmployee(employeeID) {
-        const path = `localhost:8081/employees/${employeeID.employee.code}`;
-        axios.delete(path)
-            .then(() => {
-
-            })
-            .catch((error) => {
-                console.error(error);
-
-            });
-    };
-
-    function initForm() {
-        addEmployeeForm.name = '';
-        addEmployeeForm.author = '';
-        addEmployeeForm.description = '';
-        editForm.code = '';
-        editForm.name = '';
-        editForm.author = '';
-        editForm.description = '';
-    };
-
-    function addEmployee() {
-        const payload = {
-            name: addEmployeeForm.name,
-            author: addEmployeeForm.author,
-            description: addEmployeeForm.description,
-        };
-        const path = `/employees/localhost:8081`;
-        axios.post(path, payload)
-            .then(() => {
-
-            })
-            .catch((error) => {
-                console.log(error);
-
-            });
-        addtoggle();
-    };
-
-    function editEmployee(employee) {
-        updatetoggle();
-        editForm = employee.employee;
-    };
-
-    function updateEmployee() {
-        const payload = {
-            name: editForm.name,
-            author: editForm.author,
-            description: editForm.description,
-        };
-        const path = `/employees/localhost:8081/${editForm.code}`;
-        axios.put(path, payload)
-            .then(() => {
-
-            })
-            .catch((error) => {
-                console.error(error);
-
-            });
-        updatetoggle();
-    }
     onMount(getEmployeeList);
 
-    let addopen = false;
 
-    function addtoggle() {
-        initForm();
-        addopen = !addopen;
-    };
-    let updateopen = false;
-
-    function updatetoggle() {
-        initForm();
-        updateopen = !updateopen;
-    };
 </script>
 
 <svelte:head>
@@ -225,7 +123,9 @@
             </thead>
             <tbody>
             {#each employeesTable as employee}
+
                 <tr class="bg-white border-b dark:bg-gray-800 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600">
+
                     <th scope="row" class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white">
                         {employee.name}</th>
                     <th scope="row" class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white">
@@ -237,7 +137,7 @@
                     <td class="px-6 py-4">
                         {employee.yearsInCompany}</td>
                     <td class="px-6 py-4">
-                        <a href="#" class="font-medium text-blue-600 dark:text-blue-500 hover:underline">View</a>
+                        <Link to="/view?value={employee.code}" class="font-medium text-blue-600 dark:text-blue-500 hover:underline">View</Link>
                         <a href="#" class="font-medium text-blue-600 dark:text-blue-500 hover:underline">Update</a>
                         <a href="#" class="font-medium text-blue-600 dark:text-blue-500 hover:underline">Delete</a>
                     </td>

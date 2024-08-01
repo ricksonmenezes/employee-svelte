@@ -61,3 +61,30 @@ export function getEmployeeListGql() {
 }
     `;
 }
+
+export function getEmployeeGql(emp_code) {
+
+    return `
+        query {
+  employee(code: ${emp_code}) {
+    code
+    firstName
+    middleName
+    lastName
+    birthDate
+    hiredDate
+    
+    contacts {
+      contactNo
+      primary
+    }
+    addresses{
+      address1
+      address2
+      primary
+    }
+    
+  }
+}
+    `;
+}
