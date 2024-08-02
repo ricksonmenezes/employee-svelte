@@ -35,6 +35,34 @@ export function createEmployeeMutation(employeeData) {
     `;
 }
 
+export function updateEmployeeMutation(employeeData) {
+
+    const contactsString = `[${formatArray(employeeData.contacts)}]`;
+    const addressesString = `[${formatArray(employeeData.addresses)}]`;
+
+    return `
+        mutation {
+            updateEmployee(input: { 
+                employee: {
+                    code: ${employeeData.code},
+                    firstName: "${employeeData.firstName}",
+                    lastName: "${employeeData.lastName}",
+                    middleName: "${employeeData.middleName}",
+                    gender: ${employeeData.gender},  
+                    position: "${employeeData.position}",
+                    birthDate: ${employeeData.birthDate},
+                    hiredDate: ${employeeData.hiredDate},
+                    maritalStatus: ${employeeData.maritalStatus}  
+                } 
+                contacts: ${contactsString}
+                addresses: ${addressesString}
+            }) {
+                code 
+            }
+        }
+    `;
+}
+
 export function getEmployeeListGql() {
 
     return `
@@ -48,10 +76,12 @@ export function getEmployeeListGql() {
     hiredDate
     
     contacts {
+      id
       contactNo
       primary
     }
     addresses{
+      id
       address1
       address2
       primary
@@ -69,16 +99,20 @@ export function getEmployeeGql(emp_code) {
   employee(code: ${emp_code}) {
     code
     firstName
+    gender
     middleName
     lastName
+    maritalStatus
     birthDate
     hiredDate
-    
+    position
     contacts {
+      id
       contactNo
       primary
     }
     addresses{
+      id
       address1
       address2
       primary
@@ -87,4 +121,12 @@ export function getEmployeeGql(emp_code) {
   }
 }
     `;
+}
+
+export function deleteEmployeeGql(emp_code) {
+
+    return `
+        mutation {
+            deleteEmployee(code: ${emp_code})
+        }`;
 }

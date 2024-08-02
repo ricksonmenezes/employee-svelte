@@ -138,7 +138,7 @@
                         {employee.yearsInCompany}</td>
                     <td class="px-6 py-4">
                         <Link to="/view?value={employee.code}" class="font-medium text-blue-600 dark:text-blue-500 hover:underline">View</Link>
-                        <a href="#" class="font-medium text-blue-600 dark:text-blue-500 hover:underline">Update</a>
+                        <a href="/edit?value={employee.code}" class="font-medium text-blue-600 dark:text-blue-500 hover:underline">Update</a>
                         <a href="#" class="font-medium text-blue-600 dark:text-blue-500 hover:underline">Delete</a>
                     </td>
                 </tr>
