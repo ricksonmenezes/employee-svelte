@@ -1,3 +1,5 @@
+
+
 <script>
     import { Input, Label,Dropdown,DropdownItem, Helper, Button, Checkbox, A } from 'flowbite-svelte';
     import { navigate } from 'svelte-routing'
@@ -7,40 +9,82 @@
 
     import { ChevronDownOutline } from 'flowbite-svelte-icons';
     import apiService from '../lib/api';
-    import { getEmployeeGql} from "../lib/graphqlqueries.js";
+    import {deleteEmployeeGql, getEmployeeGql} from "../lib/graphqlqueries.js";
+    //import { initializeDeleteModal } from '../lib/deletemodal.js';
+
+    let deleteModalController;
+
+
+    function openModal() {
+        debugger
+        deleteModalController.open();
+    }
 
     let formData = {
-        contactPrimary1 : false,
-        contactPrimary2 : false,
-        contactPrimary3 : false,
-        addressPrimary1 : false,
-        addressPrimary2 : false,
+
+        code:null,
+        contactPrimary1: false,
+        contactPrimary2: false,
+        contactPrimary3: false,
+        addressPrimary1: false,
+        addressPrimary2: false,
+        contact1ID: '',
         contact1: '',
+        contact2ID: '',
         contact2: '',
+        contact3ID: '',
         contact3: '',
-        selectedMaritalStatus : '',
-        selectedGender : '',
+        selectedMaritalStatus: '',
+        selectedGender: '',
         hiredDate: null,
-        birthdate: null,
+        birthDate: null,
         position: '',
-        address1:'',
-        address2:'',
-        address3:'',
-        address4:'',
+        addressID1: '',
+        address1: '',
+        address2: '',
+        addressID2: '',
+        address3: '',
+        address4: '',
         firstName: '',
         lastName: '',
-        middleName:''
+        middleName: ''
 
     };
 
     let emp_code = null;
+    let action = null;
+
     onMount(() => {
         const urlParams = new URLSearchParams(window.location.search);
         emp_code = urlParams.get('value');
+        action = urlParams.get('action')
         if(emp_code) {
             getEmployee(emp_code);
         }
+
+       // deleteModalController = initializeDeleteModal();
+        console.log("df")
     });
+
+    async function deleteEmployee() {
+
+        try {
+            const graphQuery = deleteEmployeeGql(emp_code)
+            const response = await apiService.getGraphQLData(graphQuery);
+            if(response.status === 200) {
+
+                console.log('Response:', response.data);
+                navigate('/');
+
+            } else {
+                //   addEmployeeError = 'Something went wrong when creating an employee record. Please try again later.'
+                console.log('Response was ', response.status);
+            }
+
+        } catch (error) {
+            console.log(error);
+        }
+    }
 
     async function getEmployee(emp_code) {
 
@@ -65,40 +109,55 @@
 
     function  prepareEmploteeDataForTable(employeeObj) {
 
+        debugger
         let employee = employeeObj.data.employee;
         const primaryContactObj = employee.contacts.find(contact => contact.primary);
+        const primaryAddress = employee.addresses.find(address => address.primary);
+        const nonPrimaryContacts = employee.contacts.filter(contact => !contact.primary);
+        const nonPrimaryAddress = employee.addresses.filter(address => !address.primary);
+        console.log(employee)
 
-         formData = {
+
+
+        formData = {
+
+            code: employee.code,
             contactPrimary1 : true,
             contactPrimary2 : false,
             contactPrimary3 : false,
             addressPrimary1 : true,
             addressPrimary2 : false,
-            contact1: primaryContactObj.contact,
-            contact2: '',
-            contact3: '',
+            contact1: primaryContactObj.contactNo,
+            contact1ID: primaryContactObj.id,
+            contact2: nonPrimaryContacts[0] ? nonPrimaryContacts[0].contactNo :  '',
+            contact2ID: nonPrimaryContacts[0] ? nonPrimaryContacts[0].id : '',
+            contact3ID: nonPrimaryContacts[1] ? nonPrimaryContacts[1].id : '',
+            contact3: nonPrimaryContacts[1] ? nonPrimaryContacts[1].contactNo :  '',
             selectedMaritalStatus : employee.maritalStatus,
             selectedGender : employee.gender,
             hiredDate: employee.hiredDate,
-            birthdate: employee.birthdate,
+            birthDate: employee.birthDate,
             position: employee.position,
-            address1:'',
-            address2:'',
-            address3:'',
-            address4:'',
+            addressID1: primaryAddress.id,
+            address1: primaryAddress.address1,
+            address2: primaryAddress.address2,
+            addressID2: nonPrimaryAddress[0] ? nonPrimaryAddress[0].id : '',
+            address3: nonPrimaryAddress[0] ? nonPrimaryAddress[0].address1 : '',
+            address4: nonPrimaryAddress[0] ? nonPrimaryAddress[0].address2 : '',
             firstName: employee.firstName,
             lastName: employee.lastName,
             middleName:employee.middleName
 
         };
-
+        datePickerBirthDate = new Date(formData.birthDate)
+        datePickerHiredDate = new Date(formData.hiredDate);
     }
 
 
-
-    let startDate1 = new Date();
-    let startDate2 = new Date();
-    let dateFormat = 'MM/dd/yy';
+    let  datePickerBirthDate = new Date();
+    debugger
+    let datePickerHiredDate = new Date();
+    let dateFormat = 'yyyy-MM-dd';
     let isOpen1 = false;
     let isOpen2 = false;
 
@@ -109,19 +168,19 @@
         return dateString && format(new Date(dateString), dateFormat) || '';
     };
 
-    let formattedStartDate1 = formatDate(startDate1);
-    let formattedStartDate2 = formatDate(startDate2);
+    let formattedBirthDate = formatDate(datePickerBirthDate);
+    let formattedHiredDate = formatDate(datePickerHiredDate);
 
     const onChange1 = () => {
-        startDate1 = new Date(formattedStartDate1);
+        datePickerBirthDate = new Date(formattedBirthDate);
     };
 
     const onChange2 = () => {
-        startDate2 = new Date(formattedStartDate2);
+        datePickerHiredDate = new Date(formattedHiredDate);
     };
 
-    $: formattedStartDate1 = formatDate(startDate1);
-    $: formattedStartDate2 = formatDate(startDate2);
+    $: formattedBirthDate = formatDate(datePickerBirthDate);
+    $: formattedHiredDate = formatDate(datePickerHiredDate);
 
 
     let maritalStatusError = '';
@@ -130,55 +189,55 @@
     let addressPrimaryError = '';
     let addEmployeeError = '';
 
-
+    
 </script>
 
-<h1>View an Employee</h1>
+<h1>View Employee</h1>
 <p></p>
 
     <div class="grid gap-x-8 gap-y-4 grid-cols-4">
         <div>
             <Label for="first_name" class="mb-2">First name</Label>
-            <Input disabled type="text" id="first_name" bind:value={formData.firstName} placeholder="John" required />
+            <Input disabled type="text" id="first_name" bind:value={formData.firstName} placeholder="John" required/>
         </div>
         <div>
             <Label for="contact_1" class="mb-2">Contact 1</Label>
-            <Input disabled type="text" id="contact_1" bind:value={formData.contact1} placeholder="123-123-2345" required />
+            <Input disabled type="text" id="contact_1" bind:value={formData.contact1} placeholder="123-123-2345" required/>
         </div>
 
         <div>
 
-            <Checkbox disabled bind:checked={formData.contactPrimary1} class="mb-6 space-x-1 rtl:space-x-reverse" >
+            <Checkbox bind:checked={formData.contactPrimary1} class="mb-6 space-x-1 rtl:space-x-reverse">
                 Primary
             </Checkbox>
         </div>
         <div></div>
         <div>
             <Label for="middle_name" class="mb-2">Middle name</Label>
-            <Input disabled type="text" id="middle_name" bind:value={formData.middleName} placeholder="A"  />
+            <Input disabled type="text" id="middle_name" bind:value={formData.middleName} placeholder="A"/>
         </div>
         <div>
             <Label for="contact_2" class="mb-2">Contact 2</Label>
-            <Input disabled type="text" id="contact_2" bind:value={formData.contact2} placeholder="123-234-2342" />
+            <Input disabled type="text" id="contact_2" bind:value={formData.contact2} placeholder="123-234-2342"/>
         </div>
         <div>
             <div></div>
-            <Checkbox disabled bind:checked={formData.contactPrimary2}  class="mb-6 space-x-1 rtl:space-x-reverse" >
+            <Checkbox disabled bind:checked={formData.contactPrimary2} class="mb-6 space-x-1 rtl:space-x-reverse">
                 Primary
             </Checkbox>
         </div>
         <div></div>
         <div>
             <Label for="last_name" class="mb-2">Last name</Label>
-            <Input disabled type="text" id="last_name" bind:value={formData.lastName} placeholder="Doe" required />
+            <Input disabled  type="text" id="last_name" bind:value={formData.lastName} placeholder="Doe" required/>
         </div>
         <div>
             <Label for="contact_3" class="mb-2">Contact 3</Label>
-            <Input disabled type="text" id="contact_3" bind:value={formData.contact3} placeholder="123-234-2342" />
+            <Input disabled  type="text" id="contact_3" bind:value={formData.contact3} placeholder="123-234-2342"/>
         </div>
         <div>
-            <div>  </div>
-            <Checkbox disabled bind:checked={formData.contactPrimary3}  class="mb-6 space-x-1 rtl:space-x-reverse" >
+            <div></div>
+            <Checkbox disabled bind:checked={formData.contactPrimary3} class="mb-6 space-x-1 rtl:space-x-reverse">
                 Primary
             </Checkbox>
         </div>
@@ -194,35 +253,40 @@
                 </div>
                 <input required  id="birthdate" bind:value={formData.birthdate} type="text" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full ps-10 p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="Select date">
             </div>-->
-            <DatePicker   bind:isOpen={isOpen1} bind:startDate={startDate1}>
-                <input disabled type="text" bind:value={formattedStartDate1} required placeholder="Select date" on:change={onChange1}  on:click={toggleDatePicker1} />
+            <DatePicker bind:isOpen={isOpen1}  bind:startDate={datePickerBirthDate}>
+                <input type="text" disabled bind:value={formattedBirthDate} required placeholder="Select date"
+                       on:change={onChange1} on:click={toggleDatePicker1}/>
             </DatePicker>
         </div>
         <div>
             <div>
                 <Label for="address1" class="mb-2">Address 1</Label>
-                <Input disabled type="text" id="address1" bind:value={formData.address1} placeholder="Apartment 23A, Rupert Street" required />
+                <Input disabled  type="text" id="address1" bind:value={formData.address1}
+                       placeholder="Apartment 23A, Rupert Street" required/>
             </div>
         </div>
         <div>
             <div>
                 <Label for="address2" class="mb-2">Address 2</Label>
-                <Input disabled type="text" id="address2" bind:value={formData.address2} placeholder="Lexington Avenue, London" required />
+                <Input disabled type="text" id="address2" bind:value={formData.address2} placeholder="Lexington Avenue, London"
+                       required/>
             </div>
         </div>
         <div>
 
-            <Checkbox disabled bind:checked={formData.addressPrimary1} class="mb-6 space-x-1 rtl:space-x-reverse" >
+            <Checkbox disabled bind:checked={formData.addressPrimary1} class="mb-6 space-x-1 rtl:space-x-reverse">
                 Primary
             </Checkbox>
         </div>
         <div>
             <Label for="gender" class="mb-2">Gender</Label>
-            <Button disabled><ChevronDownOutline class="w-6 h-6 ms-2 text-white dark:text-white" />
+            <Button disabled>
+                <ChevronDownOutline class="w-6 h-6 ms-2 text-white dark:text-white"/>
                 {formData.selectedGender || 'Select an option'}</Button>
             <Dropdown>
                 <DropdownItem on:click={() => { formData.selectedGender = 'MALE'; genderError='' }}>Male</DropdownItem>
-                <DropdownItem on:click={() => { formData.selectedGender = 'FEMALE';genderError='' }}>Female</DropdownItem>
+                <DropdownItem on:click={() => { formData.selectedGender = 'FEMALE';genderError='' }}>Female
+                </DropdownItem>
                 <DropdownItem on:click={() => { formData.selectedGender = 'OTHER';genderError='' }}>Other</DropdownItem>
             </Dropdown>
             {#if formData.genderError}
@@ -232,29 +296,37 @@
         <div>
             <div>
                 <Label for="address3" class="mb-2">Address 1</Label>
-                <Input disabled type="text" id="address3" bind:value={formData.address3} placeholder="Apartment 23A, Rupert Street" />
+                <Input disabled type="text" id="address3" bind:value={formData.address3}
+                       placeholder="Apartment 23A, Rupert Street"/>
             </div>
         </div>
         <div>
             <div>
                 <Label for="address4" class="mb-2">Address 2</Label>
-                <Input disabled type="text" id="address4" bind:value={formData.address4} placeholder="Lexington Avenue, London" />
+                <Input disabled type="text" id="address4" bind:value={formData.address4} placeholder="Lexington Avenue, London"/>
             </div>
         </div>
         <div>
 
-            <Checkbox disabled bind:checked={formData.addressPrimary2} class="mb-6 space-x-1 rtl:space-x-reverse" >
+            <Checkbox bind:checked={formData.addressPrimary2} class="mb-6 space-x-1 rtl:space-x-reverse">
                 Primary
             </Checkbox>
         </div>
         <div>
             <Label for="maritalstatus" class="mb-2">Marital Status</Label>
-            <Button disabled><ChevronDownOutline class="w-6 h-6 ms-2 text-white dark:text-white" />
+            <Button disabled>
+                <ChevronDownOutline class="w-6 h-6 ms-2 text-white dark:text-white"/>
                 {formData.selectedMaritalStatus || 'Select an option'}</Button>
             <Dropdown>
-                <DropdownItem on:click={() => { formData.selectedMaritalStatus = 'MARRIED'; maritalStatusError='' }}>Married</DropdownItem>
-                <DropdownItem on:click={() => { formData.selectedMaritalStatus = 'SINGLE'; maritalStatusError='' }}>Single</DropdownItem>
-                <DropdownItem on:click={() => { formData.selectedMaritalStatus = 'WIDOWED'; maritalStatusError='' }}>Widowed</DropdownItem>
+                <DropdownItem on:click={() => { formData.selectedMaritalStatus = 'MARRIED'; maritalStatusError='' }}>
+                    Married
+                </DropdownItem>
+                <DropdownItem on:click={() => { formData.selectedMaritalStatus = 'SINGLE'; maritalStatusError='' }}>
+                    Single
+                </DropdownItem>
+                <DropdownItem on:click={() => { formData.selectedMaritalStatus = 'WIDOWED'; maritalStatusError='' }}>
+                    Widowed
+                </DropdownItem>
             </Dropdown>
             {#if maritalStatusError}
                 <p class="text-red-500">{maritalStatusError}</p>
@@ -265,16 +337,17 @@
         <div></div>
         <div>
             <Label for="position" class="mb-2">Position</Label>
-            <Input disabled type="text" id="position" bind:value={formData.position} required  placeholder="Software Tester" />
+            <Input disabled type="text" id="position" bind:value={formData.position} required placeholder="Software Tester"/>
         </div>
         <div></div>
         <div></div>
         <div></div>
         <div>
-            <Label for="hiredDate" class="mb-2">Date Hired</Label>
-            <!--<Input disabled type="date" id="hiredDate"  bind:value={formData.hiredDate} required />-->
-            <DatePicker   bind:isOpen={isOpen2} bind:startDate={startDate2}>
-                <input disabled  type="text" bind:value={formattedStartDate2} required placeholder="Select date" on:change={onChange2} on:click={toggleDatePicker2} />
+            <Label for="hireddate" class="mb-2">Date Hired</Label>
+            <!--<Input disabled type="date" id="hireddate"  bind:value={formData.hireddate} required />-->
+            <DatePicker bind:isOpen={isOpen2} bind:startDate={datePickerHiredDate}>
+                <input type="text" disabled bind:value={formattedHiredDate} required placeholder="Select date"
+                       on:change={onChange2} on:click={toggleDatePicker2}/>
             </DatePicker>
         </div>
         <div></div>
@@ -295,5 +368,18 @@
             <p class="text-red-500">{addEmployeeError}</p>
         {/if}
     </div>
-
+   <!--{#if action === 'delete'}-->
+    <Button on:click={deleteEmployee} id="confirm-delete-employee">Delete</Button>
+    <!--{/if}-->
     <Button href="/">Cancel</Button>
+
+
+<div id="delete-modal" class="fixed inset-0 flex items-center justify-center z-50 hidden">
+    <div class="bg-white rounded-lg shadow-lg p-6">
+        <h3 class="mb-5 text-lg font-normal text-gray-500">Are you sure you want to delete this item?</h3>
+        <div class="flex justify-end">
+            <button id="confirm-delete" class="text-white bg-red-600 hover:bg-red-800 px-4 py-2 rounded-lg">Yes, I'm sure</button>
+            <button id="cancel-delete" class="ml-2 text-gray-500 hover:bg-gray-200 px-4 py-2 rounded-lg">Cancel</button>
+        </div>
+    </div>
+</div>

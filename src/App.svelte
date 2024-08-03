@@ -22,7 +22,9 @@ import EditEmployee from "./routes/EditEmployee.svelte";
       <Route path="/" component={EmployeeList} />
       <Route path="/add2" component={AddEmployee} />
       <Route path="/view" component={ViewEmployee} />
+      <Route path="/delete" component={ViewEmployee} />
       <Route path="/edit" component={EditEmployee} />
+
     </Router>
   </div>
 </main>

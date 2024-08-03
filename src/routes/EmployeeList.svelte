@@ -11,6 +11,7 @@
 
     function prepareEmploteeDataForTable(employees) {
 
+        debugger
          employeesTable = employees.data.employees.map(employee => {
 
              const code = employee.code;
@@ -95,6 +96,9 @@
 
     <Link to="/add2">Add Employee</Link>
 
+    {#if employeesTable.length === 0}
+        <p class="text-red-500">No Data</p>
+    {:else}
 
     <div class="relative overflow-x-auto shadow-md sm:rounded-lg">
         <table class="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400">
@@ -137,9 +141,9 @@
                     <td class="px-6 py-4">
                         {employee.yearsInCompany}</td>
                     <td class="px-6 py-4">
-                        <Link to="/view?value={employee.code}" class="font-medium text-blue-600 dark:text-blue-500 hover:underline">View</Link>
+                        <Link to="/view?value={employee.code}&action=view" class="font-medium text-blue-600 dark:text-blue-500 hover:underline">View</Link>
                         <a href="/edit?value={employee.code}" class="font-medium text-blue-600 dark:text-blue-500 hover:underline">Update</a>
-                        <a href="#" class="font-medium text-blue-600 dark:text-blue-500 hover:underline">Delete</a>
+                        <a href="/delete?value={employee.code}&action=delete" class="font-medium text-blue-600 dark:text-blue-500 hover:underline">Delete</a>
                     </td>
                 </tr>
             {/each}
@@ -175,5 +179,6 @@
         </nav>
     </div>
 
-
+    {/if}
 </div>
+
