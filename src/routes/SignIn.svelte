@@ -4,35 +4,64 @@
     import {userbaseStore, userStore, promiseStore} from '../stores'
     import { navigate } from 'svelte-routing'
     import {onMount} from "svelte";
+    import {userHasPrivilege} from "../stores.js";
+  //  import {authenticate, user} from "../lib/auth.js";
 
-    let username, password
 
-    console.log('reaches ' + new Date())
+    let username, password;
+
+    console.log('reaches signing ' + new Date())
     onMount(() => {
         if($userStore) {
-            console.log('reaches onMoun' + new Date())
+            console.log('reaches onMoun of signing' + new Date())
             navigate('/list')
         }
 
-        // deleteModalController = initializeDeleteModal();
+
 
     });
 
+    function signedIn() {
+
+        return $userStore ? true : false
+       // return true;
+    }
+
+    function signedInlocal() {
+
+        return $userStore ? true : false
+        // return true;
+    }
 
     function signin() {
 
-        debugger
+
         if($userStore  && $userStore.username === username) {
+            console.log('reahes signin function of signin')
             navigate('/list');
         } else {
             $promiseStore = $userbaseStore.signIn({username, password})
-                .then((user) => $userStore = user)
+                .then((user) => {
+                    $userStore = user
+
+                    console.log('userstore values ' + $userStore.username)
+                    $userHasPrivilege = $userStore.username === 'admin'
+                    console.log($userHasPrivilege)
+                })
         }
 
-
-        debugger
         console.log($userStore)
     }
+
+    /*function signinlocal() {
+
+        if (authenticate(username, password)) {
+            // If authentication is successful, update the store
+            $user = { username, password };
+            localStorage.setItem('user', JSON.stringify({ username, password }));
+            navigate('/list');
+        }
+    }*/
 </script>
 
 
@@ -40,7 +69,7 @@
         <div class="flex flex-col items-center justify-center px-6 py-8 mx-auto md:h-screen lg:py-0">
             <a href="#" class="flex items-center mb-6 text-2xl font-semibold text-gray-900 dark:text-white">
                 <img class="w-8 h-8 mr-2" src="https://www.legalmatch.com/" alt="logo">
-                LegalMatch
+                Employee Management
             </a>
             <div class="w-full bg-white rounded-lg shadow dark:border md:mt-0 sm:max-w-md xl:p-0 dark:bg-gray-800 dark:border-gray-700">
                 <div class="p-6 space-y-4 md:space-y-6 sm:p-8">
@@ -74,3 +103,4 @@
             </div>
         </div>
     </section>
+

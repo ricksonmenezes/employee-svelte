@@ -1,11 +1,11 @@
 <script>
-    /*import Router from 'svelte-spa-router';*/
+
     import {Link, navigate} from 'svelte-routing';
     import axios from 'axios';
     import {onMount} from 'svelte';
     import { getEmployeeListGql} from "../lib/graphqlqueries.js";
     import apiService from "../lib/api.js";
-
+    import {userHasPrivilege, userStore} from '../stores'
 
     var employeesTable = [];
 
@@ -63,13 +63,13 @@
             const response = await apiService.getGraphQLData(graphQuery);
             if(response.status === 200) {
 
-                console.log('Response:', response.data);
+                //console.log('Response:', response.data);
 
                 prepareEmployeeDataForTable(response.data);
 
             } else {
              //   addEmployeeError = 'Something went wrong when creating an employee record. Please try again later.'
-                console.log('Response was ', response.status);
+               // console.log('Response was ', response.status);
             }
 
         } catch (error) {
@@ -78,7 +78,12 @@
 
     }
 
-    onMount(getEmployeeList);
+
+    onMount(() => {
+        console.log('userstore values '  + $userStore ? $userStore.username : '');
+        getEmployeeList();
+
+    });
 
 
 </script>
@@ -94,8 +99,9 @@
 
 <div>
 
+    {#if $userHasPrivilege}
     <Link to="/add2">Add Employee</Link>
-
+        {/if}
     {#if employeesTable.length === 0}
         <p class="text-red-500">No Data</p>
     {:else}
@@ -142,8 +148,11 @@
                         {employee.yearsInCompany}</td>
                     <td class="px-6 py-4">
                         <Link to="/view?value={employee.code}&action=view" class="font-medium text-blue-600 dark:text-blue-500 hover:underline">View</Link>
-                        <a href="/edit?value={employee.code}" class="font-medium text-blue-600 dark:text-blue-500 hover:underline">Update</a>
-                        <a href="/delete?value={employee.code}&action=delete" class="font-medium text-blue-600 dark:text-blue-500 hover:underline">Delete</a>
+
+                        {#if $userHasPrivilege}
+                        <Link to="/edit?value={employee.code}" class="font-medium text-blue-600 dark:text-blue-500 hover:underline">Update</Link>
+                        <Link to="/delete?value={employee.code}&action=delete" class="font-medium text-blue-600 dark:text-blue-500 hover:underline">Delete</Link>
+                        {/if}
                     </td>
                 </tr>
             {/each}

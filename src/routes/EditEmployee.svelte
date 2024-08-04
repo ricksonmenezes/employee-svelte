@@ -59,12 +59,12 @@
             const response = await apiService.getGraphQLData(graphQuery);
             if(response.status === 200) {
 
-                console.log('Response:', response.data);
+            //    console.log('Response:', response.data);
                 prepareEmploteeDataForTable(response.data);
 
             } else {
                 //   addEmployeeError = 'Something went wrong when creating an employee record. Please try again later.'
-                console.log('Response was ', response.status);
+               // console.log('Response was ', response.status);
             }
 
         } catch (error) {
@@ -75,7 +75,7 @@
 
     function  prepareEmploteeDataForTable(employeeObj) {
 
-        debugger
+
         let employee = employeeObj.data.employee;
         const primaryContactObj = employee.contacts.find(contact => contact.primary);
         const primaryAddress = employee.addresses.find(address => address.primary);
@@ -121,7 +121,7 @@
 
 
     let  datePickerBirthDate = new Date();
-    debugger
+
     let datePickerHiredDate = new Date();
     let dateFormat = 'yyyy-MM-dd';
     let isOpen1 = false;
@@ -193,7 +193,7 @@
         }
         console.log("startdate1 " + datePickerBirthDate);
         console.log("formattedStartDate1 " + formattedBirthDate)
-        debugger
+
 
 
         let contacts = [];
@@ -257,6 +257,10 @@
             console.log(error);
         }
 
+    }
+
+    function cancel() {
+        navigate('/');
     }
 </script>
 
@@ -437,5 +441,5 @@
         {/if}
     </div>
     <Button type="submit">Update</Button>
-    <Button href="/">Cancel</Button>
+    <Button on:click={cancel} >Cancel</Button>
 </form>

@@ -1,17 +1,16 @@
   <script>
     import "./app.css";
-  import svelteLogo from './assets/svelte.svg'
-  import viteLogo from '/vite.svg'
-  import Counter from './lib/Counter.svelte'
+
   import { Router, Route, navigate } from 'svelte-routing';
   import EmployeeList from "./routes/EmployeeList.svelte";
   import AddEmployee from "./routes/AddEmployee.svelte";
   import ViewEmployee from "./routes/ViewEmployee.svelte";
   import EditEmployee from "./routes/EditEmployee.svelte";
   //import SignIn from "./routes/SignIn.svelte";
-  import {userbaseStore, userStore, promiseStore} from './stores'
+  import {userbaseStore,isLoading, userStore, userHasPrivilege, promiseStore} from './stores'
     import SignIn from "./routes/SignIn.svelte";
     import Logout from "./routes/Logout.svelte";
+    import {onMount} from "svelte";
 
   const userbase = window.userbase
   window.userbase = null
@@ -23,20 +22,39 @@
           .then((session) => $userStore = session.user)
 
 
+    onMount(() => {
 
+
+    });
   function retrySignIn() {
 
     navigate('/');
   }
 
-    $: if ($userStore) {
-      console.log('reaches $:' + new Date())
+  console.log('$userstore in app.svelte reached ')
+    let appReady = false;
+    $: if (!$isLoading) {
+      console.log('isloading becoming true')
+      console.log('value of userStore ' + $userStore)
+      appReady = true;
+    }
+
+    $: if (appReady && $userStore) {
+      if($userStore.username === 'admin') {
+        $userHasPrivilege= true;
+      }
+      console.log('reaches reactive $Userstore on app.svelte ' + $userStore.user+ ' date:' + new Date())
       navigate('/list');
     } else {
+
+    console.log('app.svelte else loop of user store /')
       navigate('/');
     }
     function signout() {
-      $promiseStore = $userbaseStore.signOut().then(() => $userStore = null)
+      $promiseStore = $userbaseStore.signOut().then(() => {
+        $userStore = null;
+        $userHasPrivilege = false;
+      })
     }
   </script>
 
@@ -48,7 +66,7 @@
         Loading..
       {:catch error}
         {#if error}
-          debugger
+
           <strong class="text-red-700 font-bold">ERROR! {error} </strong>
         {/if}
         {#if $userStore}

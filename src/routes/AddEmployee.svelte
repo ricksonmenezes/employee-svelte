@@ -110,7 +110,7 @@
         }
         console.log("startdate1 " + startDate1);
         console.log("formattedStartDate1 "  + formattedStartDate1)
-        debugger
+
 
 
         let contacts = [];

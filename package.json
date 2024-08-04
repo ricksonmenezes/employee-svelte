@@ -23,6 +23,7 @@
     "@svelte-plugins/datepicker": "^1.0.9",
     "axios": "^1.7.2",
     "date-fns": "^3.6.0",
+    "svelte-local-storage-store": "^0.6.4",
     "svelte-routing": "^2.13.0"
   }
 }

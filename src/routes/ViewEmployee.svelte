@@ -6,17 +6,20 @@
     import { onMount } from 'svelte';
     import { DatePicker } from "@svelte-plugins/datepicker";
     import { format } from 'date-fns';
+    import { userHasPrivilege } from '../stores'
 
     import { ChevronDownOutline } from 'flowbite-svelte-icons';
     import apiService from '../lib/api';
     import {deleteEmployeeGql, getEmployeeGql} from "../lib/graphqlqueries.js";
+    import {userbaseStore} from "../stores.js";
     //import { initializeDeleteModal } from '../lib/deletemodal.js';
 
     let deleteModalController;
 
 
+    console.log("startofpagemounduserhasprivileges" + $userHasPrivilege)
     function openModal() {
-        debugger
+
         deleteModalController.open();
     }
 
@@ -55,17 +58,24 @@
     let action = null;
 
     onMount(() => {
+        console.log("startofmounduserhasprivileges" + $userHasPrivilege)
         const urlParams = new URLSearchParams(window.location.search);
         emp_code = urlParams.get('value');
         action = urlParams.get('action')
         if(emp_code) {
             getEmployee(emp_code);
         }
+        console.log("userhasprivileges" + $userHasPrivilege)
+
 
        // deleteModalController = initializeDeleteModal();
         console.log("df")
     });
 
+    function cancel() {
+        navigate('/list')
+
+    }
     async function deleteEmployee() {
 
         try {
@@ -109,7 +119,7 @@
 
     function  prepareEmploteeDataForTable(employeeObj) {
 
-        debugger
+
         let employee = employeeObj.data.employee;
         const primaryContactObj = employee.contacts.find(contact => contact.primary);
         const primaryAddress = employee.addresses.find(address => address.primary);
@@ -155,7 +165,7 @@
 
 
     let  datePickerBirthDate = new Date();
-    debugger
+
     let datePickerHiredDate = new Date();
     let dateFormat = 'yyyy-MM-dd';
     let isOpen1 = false;
@@ -368,11 +378,10 @@
             <p class="text-red-500">{addEmployeeError}</p>
         {/if}
     </div>
-   <!--{#if action === 'delete'}-->
+   {#if $userHasPrivilege}
     <Button on:click={deleteEmployee} id="confirm-delete-employee">Delete</Button>
-    <!--{/if}-->
-    <Button href="/">Cancel</Button>
-
+   {/if}
+<Button on:click={cancel}>Cancel</Button>
 
 <div id="delete-modal" class="fixed inset-0 flex items-center justify-center z-50 hidden">
     <div class="bg-white rounded-lg shadow-lg p-6">
