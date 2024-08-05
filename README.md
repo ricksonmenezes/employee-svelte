@@ -49,6 +49,14 @@ Same above goes for port 8081, 8080.
 
 On Windows, one could merely go to services and stop mysql.
 
+# 7. COMMANDS TO RUN
+
+1. Go to an empty folder in your machine open on terminal (terminal discussed on 4.3)
+2. `git clone https://github.com/ricksonmenezes/employee-svelte.git`
+3. you will find a new folder employee-svelte. cd /employee-svelte
+4. once inside, run command below
+
+`docker compose up --build`
 
 # 7. Commands to run for starting a docker container
 
