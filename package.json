@@ -6,7 +6,8 @@
   "scripts": {
     "dev": "vite --port 8080",
     "build": "vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "start": "sirv public --no-clear --port 8082"
   },
   "devDependencies": {
     "@sveltejs/vite-plugin-svelte": "^3.1.1",
