@@ -25,7 +25,7 @@ Added an external service, UserBase for login/logout. Incredibly nice service bu
 
 `docker build . -t employee-svelte-docker`
 
-`docker run --rm --name=employee-svelte-docker -p 5000:80 employee-svelte-docker`
+`docker run --rm --name=employee-svelte-docker -p 8082:80 employee-svelte-docker`
 
 If Nginx says it is "ready", your client app should start on localhost:8082
 
