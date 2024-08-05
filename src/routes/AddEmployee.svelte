@@ -172,6 +172,10 @@
         }
 
     }
+
+    function returnToList() {
+        navigate('/list');
+    }
 </script>
 
 <h1>Add an Employee</h1>
@@ -337,5 +341,5 @@
         {/if}
     </div>
     <Button type="submit">Submit</Button>
-    <Button href="/">Cancel</Button>
+    <Button on:click="{returnToList}">Cancel</Button>
 </form>

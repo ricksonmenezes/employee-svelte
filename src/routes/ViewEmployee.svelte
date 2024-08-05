@@ -56,6 +56,7 @@
 
     let emp_code = null;
     let action = null;
+    let showDelete = false;
 
     onMount(() => {
         console.log("startofmounduserhasprivileges" + $userHasPrivilege)
@@ -65,6 +66,7 @@
         if(emp_code) {
             getEmployee(emp_code);
         }
+        showDelete = $userHasPrivilege && action === 'delete';
         console.log("userhasprivileges" + $userHasPrivilege)
 
 
@@ -199,6 +201,7 @@
     let addressPrimaryError = '';
     let addEmployeeError = '';
 
+
     
 </script>
 
@@ -217,7 +220,7 @@
 
         <div>
 
-            <Checkbox bind:checked={formData.contactPrimary1} class="mb-6 space-x-1 rtl:space-x-reverse">
+            <Checkbox  disabled bind:checked={formData.contactPrimary1} class="mb-6 space-x-1 rtl:space-x-reverse">
                 Primary
             </Checkbox>
         </div>
@@ -318,7 +321,7 @@
         </div>
         <div>
 
-            <Checkbox bind:checked={formData.addressPrimary2} class="mb-6 space-x-1 rtl:space-x-reverse">
+            <Checkbox disabled bind:checked={formData.addressPrimary2} class="mb-6 space-x-1 rtl:space-x-reverse">
                 Primary
             </Checkbox>
         </div>
@@ -378,7 +381,7 @@
             <p class="text-red-500">{addEmployeeError}</p>
         {/if}
     </div>
-   {#if $userHasPrivilege}
+   {#if showDelete}
     <Button on:click={deleteEmployee} id="confirm-delete-employee">Delete</Button>
    {/if}
 <Button on:click={cancel}>Cancel</Button>

@@ -7,9 +7,10 @@ export const userHasPrivilege = writable(null)
 
 export const isLoading = writable(true);
 
+const storedUserString = localStorage.getItem('user');
 
-const storedUser = JSON.parse(localStorage.getItem('user') || 'null');
-
+// Check if the stored user exists and is not null
+const storedUser = storedUserString && (typeof storedUserString != 'undefined') && (storedUserString != "undefined") ? JSON.parse(storedUserString) : null;
 
 userStore.set(storedUser)
 console.log('storeduser' + storedUser)
