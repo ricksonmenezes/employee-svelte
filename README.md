@@ -56,8 +56,6 @@ On Windows, one could merely go to services and stop mysql.
 3. you will find a new folder employee-svelte. cd /employee-svelte
 4. once inside, run command below
 
-`docker compose up --build`
-
 # 7. Commands to run for starting a docker container
 
 `docker build . -t employee-svelte-docker`
